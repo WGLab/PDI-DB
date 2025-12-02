@@ -137,7 +137,7 @@ Organize your raw images in the following structure:
 
 ```
 raw_data/
-├── disease_0 (healthy)/
+├── disease_0/
 │   ├── patient_001.jpg
 │   ├── patient_002.jpg
 │   └── ...
