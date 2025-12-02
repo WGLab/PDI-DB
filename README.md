@@ -77,6 +77,269 @@ Explore our complete synthetic image database through an interactive web interfa
 
 ---
 
+# Usage Guide
+
+This guide walks you through setting up the environment, preprocessing your data, training a class-conditional StyleGAN3 model, and generating synthetic phenotype images.
+
+---
+
+## Table of Contents
+
+1. [Environment Setup](#1-environment-setup)
+2. [Data Preprocessing](#2-data-preprocessing)
+3. [Model Training](#3-model-training)
+4. [Generate Synthetic Images](#4-generate-synthetic-images)
+5. [Troubleshooting](#5-troubleshooting)
+
+---
+
+## 1. Environment Setup
+
+### System Requirements
+
+- **Operating System**: Linux (recommended) or Windows
+- **GPU**: 1–8 NVIDIA GPUs with ≥12 GB memory (Tesla V100, A100, or H100 recommended)
+- **CUDA**: Version 11.1 or later
+- **Python**: 3.8 or later
+- **Compiler**: GCC 7+ (Linux) or Visual Studio (Windows)
+
+### Installation Steps
+
+```bash
+# Create a new conda environment
+conda create -n gestaltgan python=3.8
+
+# Activate environment
+conda activate PDI-DB
+
+# Install PyTorch with CUDA support
+pip install torch==2.7.1 torchvision==0.22.1 torchaudio==2.7.1 --index-url https://download.pytorch.org/whl/cu118
+
+# Install other dependencies
+pip install click pillow scipy numpy requests tqdm ninja matplotlib imageio
+pip install imgui glfw pyopengl imageio-ffmpeg pyspng
+```
+
+---
+
+## 2. Data Preprocessing
+
+Before training, you need to prepare your facial phenotype images in the correct format.
+
+### Data Organization
+
+Organize your raw images in the following structure:
+
+```
+raw_data/
+├── disease_0/
+│   ├── patient_001.jpg
+│   ├── patient_002.jpg
+│   └── ...
+├── disease_1/
+│   ├── patient_001.jpg
+│   ├── patient_002.jpg
+│   └── ...
+└── disease_N/
+    ├── patient_001.jpg
+    └── ...
+```
+
+### Preprocessing Script
+
+> 📝 **Note**: Preprocessing scripts will be added in the next update. For now, follow these manual steps:
+
+**Manual Preprocessing Steps:**
+
+1. **Face Alignment**: Align all faces to a standard pose using landmark detection
+2. **Resolution**: Resize images to 224×224 pixels
+3. **Format**: Convert to PNG or JPG format
+4. **Quality Control**: Remove low-quality or ambiguous images
+
+**Expected Dataset Format:**
+
+Create a ZIP archive containing your preprocessed images:
+
+```bash
+# Using the provided dataset_tool.py (to be added)
+python dataset_tool.py \
+    --source=raw_data/ \
+    --dest=datasets/phenotype_disease_224x224.zip \
+    --resolution=224x224
+```
+
+### Dataset Structure
+
+The final dataset should be a ZIP file containing:
+
+```
+phenotype_disease_224x224.zip
+├── 00000/
+│   ├── img00000000.png
+│   ├── img00000001.png
+│   └── ...
+├── 00001/
+│   └── ...
+└── dataset.json  # Metadata with class labels
+```
+
+**Example `dataset.json` format:**
+
+```json
+{
+  "labels": [
+    ["img00000000.png", 0],
+    ["img00000001.png", 0],
+    ["img00000002.png", 1],
+    ...
+  ]
+}
+```
+
+Where the second value in each pair is the disease class index (0, 1, 2, ..., N).
+
+---
+
+## 3. Model Training
+
+### Basic Training Command
+
+Train a class-conditional StyleGAN3 model on your phenotype dataset:
+
+```bash
+python train.py \
+    --outdir=./training-runs \
+    --data=./datasets/phenotype_disease_224x224.zip \
+    --cfg=stylegan3-t \
+    --gpus=8 \
+    --batch=32 \
+    --cond=True \
+    --gamma=2 \
+    --mirror=1 \
+    --kimg=5000
+```
+
+### Training Parameters Explained
+
+| Parameter | Description | Recommended Value |
+|-----------|-------------|-------------------|
+| `--outdir` | Output directory for training results | `./training-runs` |
+| `--data` | Path to your preprocessed dataset ZIP | Required |
+| `--cfg` | Model configuration (`stylegan3-t`, `stylegan3-r`, `stylegan2`) | `stylegan3-t` |
+| `--gpus` | Number of GPUs to use | 1–8 |
+| `--batch` | Total batch size across all GPUs | 32 |
+| `--cond` | Enable class-conditional generation | `True` |
+| `--gamma` | R1 regularization weight | 2–8 |
+| `--mirror` | Enable horizontal flipping augmentation | `1` (enabled) |
+| `--kimg` | Training duration in thousands of images | 5000 |
+| `--snap` | Snapshot interval (in ticks) | 20 |
+
+### Training Configuration Examples
+
+```bash
+python train.py \
+    --outdir=./training-runs \
+    --data=./datasets/phenotype_disease_224x224.zip \
+    --cfg=stylegan3-t \
+    --gpus=8 \
+    --batch=32 \
+    --cond=True \
+    --gamma=2 \
+    --mirror=1 \
+    --kimg=5000 \
+    --snap=20
+```
+
+**Advanced Training with Learning Rate Scheduling:**
+
+```bash
+python train.py \
+    --outdir=./training-runs \
+    --data=./datasets/phenotype_disease_224x224.zip \
+    --cfg=stylegan3-t \
+    --gpus=8 \
+    --batch=32 \
+    --cond=True \
+    --gamma=2 \
+    --mirror=1 \
+    --kimg=5000 \
+    --dlr=0.0002 \
+    --glr=0.00025 \
+    --lr-scheduler=step \
+    --lr-decay-steps=1500 \
+    --lr-decay-rate=0.5
+```
+
+### Monitoring Training Progress
+
+Training outputs are saved in timestamped directories:
+
+```
+training-runs/
+└── 00000-stylegan3-t-phenotype_disease_224x224-gpus8-batch32-gamma2/
+    ├── network-snapshot-000000.pkl    # Initial model
+    ├── network-snapshot-000100.pkl    # Checkpoint at 100k images
+    ├── fakes000000.png                # Sample images at start
+    ├── fakes000100.png                # Sample images at 100k
+    ├── training_stats.jsonl           # Training metrics
+    └── metric-fid50k_full.jsonl       # FID scores (if enabled)
+```
+
+**Key files to monitor:**
+
+- `fakes*.png`: Visual quality of generated images
+- `training_stats.jsonl`: Loss values and training metrics
+- `network-snapshot-*.pkl`: Model checkpoints
+
+
+## 4. Generate Synthetic Images
+
+Once training is complete, use the trained model to generate synthetic phenotype images.
+
+### Generate Images for a Specific Disease Class
+
+```bash
+python gen_images.py \
+    --network=./training-runs/00000-stylegan3-t-.../network-snapshot-005000.pkl \
+    --outdir=./generated_images \
+    --samples=100 \
+    --class=0 \
+    --trunc=1.0
+```
+
+### Parameters
+
+| Parameter | Description | Example |
+|-----------|-------------|---------|
+| `--network` | Path to trained model `.pkl` file | `network-snapshot-005000.pkl` |
+| `--outdir` | Output directory for generated images | `./generated_images` |
+| `--samples` | Number of images to generate | `100` |
+| `--class` | Disease class index (0, 1, 2, ...) | `0` |
+| `--trunc` | Truncation psi (0.5–1.0 for quality vs diversity) | `1.0` |
+
+### Adjusting Image Quality and Diversity
+
+The `--trunc` parameter controls the trade-off between quality and diversity:
+
+- **`--trunc=0.5`**: Higher quality, less diversity (more typical faces)
+- **`--trunc=0.7`**: Balanced quality and diversity
+- **`--trunc=1.0`**: Maximum diversity, lower average quality
+
+Example with different truncation values:
+
+```bash
+# High quality, low diversity
+python gen_images.py --network=model.pkl --outdir=out_quality --samples=100 --class=0 --trunc=0.5
+
+# Balanced
+python gen_images.py --network=model.pkl --outdir=out_balanced --samples=100 --class=0 --trunc=0.7
+
+# High diversity
+python gen_images.py --network=model.pkl --outdir=out_diverse --samples=100 --class=0 --trunc=1.0
+```
+
+---
+
 ## Citation
 
 If you use this synthetic face database or codebase in your research, please cite:
@@ -94,6 +357,6 @@ If you use this synthetic face database or codebase in your research, please cit
 
 ## License
 
-[MIT LICENSE.]
+MIT LICENSE.
 
 ---
