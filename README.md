@@ -2,6 +2,30 @@
 
 > **A StyleGAN3-based synthetic face generator for rare genetic disease phenotypes**
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-1.9+-ee4c2c.svg)](https://pytorch.org/)
+
+---
+
+## 📋 Table of Contents
+
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [Model Architecture](#model-architecture)
+- [Synthetic Image Gallery](#synthetic-image-gallery)
+- [Interactive Web Gallery](#interactive-web-gallery)
+- [Getting Started](#getting-started)
+  - [1. Environment Setup](#1-environment-setup)
+  - [2. Data Preprocessing](#2-data-preprocessing)
+  - [3. Model Training](#3-model-training)
+  - [4. Generate Synthetic Images](#4-generate-synthetic-images)
+- [Citation](#citation)
+- [License](#license)
+- [Acknowledgments](#acknowledgments)
+
+---
+
 ## Overview
 
 This repository provides a **class-conditional StyleGAN3 model** trained to generate synthetic facial images representing patients with rare genetic diseases. The generated images capture disease-specific facial phenotype patterns (facial gestalt) and serve multiple purposes in computational biology and medical AI research.
@@ -19,11 +43,11 @@ This repository provides a **class-conditional StyleGAN3 model** trained to gene
 
 ## Key Features
 
-- **Class-conditional generation** across multiple rare genetic disease categories
-- **Alias-free architecture** (StyleGAN3) for improved geometric consistency
-- **High-quality 224×224 resolution** synthetic faces compatible with standard computer vision pipelines
-- **Controllable generation** with latent space manipulation capabilities
-- **Interactive web gallery** for exploring generated samples by disease type, demographics, and other attributes
+- ✨ **Class-conditional generation** across multiple rare genetic disease categories
+- 🎯 **Alias-free architecture** (StyleGAN3) for improved geometric consistency
+- 🖼️ **High-quality 224×224 resolution** synthetic faces compatible with standard computer vision pipelines
+- 🎮 **Controllable generation** with latent space manipulation capabilities
+- 🌐 **Interactive web gallery** for exploring generated samples by disease type, demographics, and other attributes
 
 ---
 
@@ -77,37 +101,26 @@ Explore our complete synthetic image database through an interactive web interfa
 
 ---
 
-# Usage Guide
+## Getting Started
 
-This guide walks you through setting up the environment, preprocessing your data, training a class-conditional StyleGAN3 model, and generating synthetic phenotype images.
+### 1. Environment Setup
 
----
-
-## Table of Contents
-
-1. [Environment Setup](#1-environment-setup)
-2. [Data Preprocessing](#2-data-preprocessing)
-3. [Model Training](#3-model-training)
-4. [Generate Synthetic Images](#4-generate-synthetic-images)
-5. [Troubleshooting](#5-troubleshooting)
-
----
-
-## 1. Environment Setup
-
-### System Requirements
+#### Prerequisites
 
 - **Operating System**: Linux (recommended) or Windows
-- **GPU**: 1–8 NVIDIA GPUs with ≥12 GB memory (Tesla V100, A100, or H100 recommended)
-- **CUDA**: Version 11.1 or later
+- **GPU**: NVIDIA GPU with ≥12 GB memory (Tesla V100, A100, or H100 recommended)
+- **CUDA**: Version 11.8 or later
 - **Python**: 3.8 or later
-- **Compiler**: GCC 7+ (Linux) or Visual Studio (Windows)
 
-### Installation Steps
+#### Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/WGLab/PDI-DB.git
+cd PDI-DB
+
 # Create a new conda environment
-conda create -n gestaltgan python=3.8
+conda create -n PDI-DB python=3.8
 
 # Activate environment
 conda activate PDI-DB
@@ -120,19 +133,25 @@ pip install click pillow scipy numpy requests tqdm ninja matplotlib imageio
 pip install imgui glfw pyopengl imageio-ffmpeg pyspng
 ```
 
+#### Verify Installation
+
+```bash
+python -c "import torch; print(f'PyTorch: {torch.__version__}'); print(f'CUDA available: {torch.cuda.is_available()}')"
+```
+
 ---
 
-## 2. Data Preprocessing
+### 2. Data Preprocessing
 
 Before training, you need to prepare your facial phenotype images in the correct format.
 
-### Data Organization
+#### Data Organization
 
 Organize your raw images in the following structure:
 
 ```
 raw_data/
-├── disease_0/
+├── disease_0 (healthy)/
 │   ├── patient_001.jpg
 │   ├── patient_002.jpg
 │   └── ...
@@ -145,30 +164,25 @@ raw_data/
     └── ...
 ```
 
-### Preprocessing Script
+#### Preprocessing Steps
 
-> 📝 **Note**: Preprocessing scripts will be added in the next update. For now, follow these manual steps:
-
-**Manual Preprocessing Steps:**
+**Manual Preprocessing:**
 
 1. **Face Alignment**: Align all faces to a standard pose using landmark detection
 2. **Resolution**: Resize images to 224×224 pixels
 3. **Format**: Convert to PNG or JPG format
 4. **Quality Control**: Remove low-quality or ambiguous images
 
-**Expected Dataset Format:**
-
-Create a ZIP archive containing your preprocessed images:
+#### Create Dataset ZIP
 
 ```bash
-# Using the provided dataset_tool.py (to be added)
 python dataset_tool.py \
     --source=raw_data/ \
     --dest=datasets/phenotype_disease_224x224.zip \
     --resolution=224x224
 ```
 
-### Dataset Structure
+#### Dataset Structure
 
 The final dataset should be a ZIP file containing:
 
@@ -190,8 +204,7 @@ phenotype_disease_224x224.zip
   "labels": [
     ["img00000000.png", 0],
     ["img00000001.png", 0],
-    ["img00000002.png", 1],
-    ...
+    ["img00000002.png", 1]
   ]
 }
 ```
@@ -200,9 +213,9 @@ Where the second value in each pair is the disease class index (0, 1, 2, ..., N)
 
 ---
 
-## 3. Model Training
+### 3. Model Training
 
-### Basic Training Command
+#### Basic Training Command
 
 Train a class-conditional StyleGAN3 model on your phenotype dataset:
 
@@ -219,7 +232,7 @@ python train.py \
     --kimg=5000
 ```
 
-### Training Parameters Explained
+#### Training Parameters
 
 | Parameter | Description | Recommended Value |
 |-----------|-------------|-------------------|
@@ -234,7 +247,7 @@ python train.py \
 | `--kimg` | Training duration in thousands of images | 5000 |
 | `--snap` | Snapshot interval (in ticks) | 20 |
 
-### Training Configuration Examples
+#### Multi-GPU Training Example
 
 ```bash
 python train.py \
@@ -250,27 +263,7 @@ python train.py \
     --snap=20
 ```
 
-**Advanced Training with Learning Rate Scheduling:**
-
-```bash
-python train.py \
-    --outdir=./training-runs \
-    --data=./datasets/phenotype_disease_224x224.zip \
-    --cfg=stylegan3-t \
-    --gpus=8 \
-    --batch=32 \
-    --cond=True \
-    --gamma=2 \
-    --mirror=1 \
-    --kimg=5000 \
-    --dlr=0.0002 \
-    --glr=0.00025 \
-    --lr-scheduler=step \
-    --lr-decay-steps=1500 \
-    --lr-decay-rate=0.5
-```
-
-### Monitoring Training Progress
+#### Monitoring Training Progress
 
 Training outputs are saved in timestamped directories:
 
@@ -291,12 +284,13 @@ training-runs/
 - `training_stats.jsonl`: Loss values and training metrics
 - `network-snapshot-*.pkl`: Model checkpoints
 
+---
 
-## 4. Generate Synthetic Images
+### 4. Generate Synthetic Images
 
 Once training is complete, use the trained model to generate synthetic phenotype images.
 
-### Generate Images for a Specific Disease Class
+#### Generate Images for a Specific Disease Class
 
 ```bash
 python gen_images.py \
@@ -307,7 +301,7 @@ python gen_images.py \
     --trunc=1.0
 ```
 
-### Parameters
+#### Generation Parameters
 
 | Parameter | Description | Example |
 |-----------|-------------|---------|
@@ -317,7 +311,7 @@ python gen_images.py \
 | `--class` | Disease class index (0, 1, 2, ...) | `0` |
 | `--trunc` | Truncation psi (0.5–1.0 for quality vs diversity) | `1.0` |
 
-### Adjusting Image Quality and Diversity
+#### Adjusting Image Quality and Diversity
 
 The `--trunc` parameter controls the trade-off between quality and diversity:
 
@@ -325,7 +319,7 @@ The `--trunc` parameter controls the trade-off between quality and diversity:
 - **`--trunc=0.7`**: Balanced quality and diversity
 - **`--trunc=1.0`**: Maximum diversity, lower average quality
 
-Example with different truncation values:
+**Examples:**
 
 ```bash
 # High quality, low diversity
@@ -357,6 +351,40 @@ If you use this synthetic face database or codebase in your research, please cit
 
 ## License
 
-MIT LICENSE.
+This project is licensed under the **MIT License** - see the full license text below.
 
----
+### MIT License
+
+```
+MIT License
+
+Copyright (c) 2025 Wang Genomics Lab
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+### Third-Party Licenses
+
+This project builds upon [StyleGAN3](https://github.com/NVlabs/stylegan3) by NVIDIA Corporation, which is licensed under the [NVIDIA Source Code License](https://github.com/NVlabs/stylegan3/blob/main/LICENSE.txt).
+
+
+
+<p align="center">
+  <sub>Built with ❤️ by Wang Genomics Lab | University of Pennsylvania</sub>
+</p>
