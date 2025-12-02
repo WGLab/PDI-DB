@@ -86,7 +86,7 @@ If you use this synthetic face database or codebase in your research, please cit
   title={Phenotype-Disease Image Database: A StyleGAN3-based Synthetic Face Generator for Rare Genetic Diseases},
   author={Wang Genomics Lab},
   year={2025},
-  howpublished={\url{https://github.com/[your-username]/PDI-DB}}
+  howpublished={\url{https://github.com/WGLab/PDI-DB}}
 }
 ```
 
