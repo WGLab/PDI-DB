@@ -327,21 +327,6 @@ python gen_images.py --network=model.pkl --outdir=out_diverse --samples=100 --cl
 
 ---
 
-## Citation
-
-If you use this synthetic face database or codebase in your research, please cite:
-
-```bibtex
-@misc{pdi-db-2025,
-  title={Phenotype-Disease Image Database: A StyleGAN3-based Synthetic Face Generator for Rare Genetic Diseases},
-  author={Wang Genomics Lab},
-  year={2025},
-  howpublished={\url{https://github.com/WGLab/PDI-DB}}
-}
-```
-
----
-
 ## License
 
 This project is licensed under the **MIT License**.
