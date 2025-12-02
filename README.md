@@ -1,4 +1,4 @@
-# Phenotype-Disease Image Database (PDIDB)
+# PDIDB: Phenotype Diseased Image Synthesis Database 
 
 > **A StyleGAN3-based synthetic face generator for rare genetic disease phenotypes**
 
