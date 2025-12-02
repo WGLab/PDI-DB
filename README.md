@@ -87,7 +87,7 @@ Explore our complete synthetic image database through an interactive web interfa
 **[🌐 Phenotype-Disease Synthetic Image Database](https://hongzhuochen.github.io/Phenotype-Disease-Image-Database-demo/)**
 
 <p align="center">
-  <img src="docs/figures/web_gallery_screenshot.png" alt="Interactive web gallery interface" width="800">
+  <img src="docs/figs/web_gallery_screenshot.png" alt="Interactive web gallery interface" width="800">
 </p>
 
 ### Gallery Features:
@@ -109,7 +109,7 @@ Explore our complete synthetic image database through an interactive web interfa
 
 - **Operating System**: Linux (recommended) or Windows
 - **GPU**: NVIDIA GPU with ≥12 GB memory (Tesla V100, A100, or H100 recommended)
-- **CUDA**: Version 11.8 or later
+- **CUDA**: Version 11.8
 - **Python**: 3.8 or later
 
 #### Installation
@@ -383,8 +383,3 @@ SOFTWARE.
 
 This project builds upon [StyleGAN3](https://github.com/NVlabs/stylegan3) by NVIDIA Corporation, which is licensed under the [NVIDIA Source Code License](https://github.com/NVlabs/stylegan3/blob/main/LICENSE.txt).
 
-
-
-<p align="center">
-  <sub>Built with ❤️ by Wang Genomics Lab | University of Pennsylvania</sub>
-</p>
