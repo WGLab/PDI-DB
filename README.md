@@ -105,13 +105,6 @@ Explore our complete synthetic image database through an interactive web interfa
 
 ### 1. Environment Setup
 
-#### Prerequisites
-
-- **Operating System**: Linux (recommended) or Windows
-- **GPU**: NVIDIA GPU with ≥12 GB memory (Tesla V100, A100, or H100 recommended)
-- **CUDA**: Version 11.8
-- **Python**: 3.8 or later
-
 #### Installation
 
 ```bash
@@ -131,12 +124,6 @@ pip install torch==2.7.1 torchvision==0.22.1 torchaudio==2.7.1 --index-url https
 # Install other dependencies
 pip install click pillow scipy numpy requests tqdm ninja matplotlib imageio
 pip install imgui glfw pyopengl imageio-ffmpeg pyspng
-```
-
-#### Verify Installation
-
-```bash
-python -c "import torch; print(f'PyTorch: {torch.__version__}'); print(f'CUDA available: {torch.cuda.is_available()}')"
 ```
 
 ---
